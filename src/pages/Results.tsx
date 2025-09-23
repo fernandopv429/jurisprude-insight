@@ -132,9 +132,13 @@ const Results = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>Acórdão</DropdownMenuItem>
-                <DropdownMenuItem>Decisão Monocrática</DropdownMenuItem>
-                <DropdownMenuItem>Súmula</DropdownMenuItem>
+                <DropdownMenuItem>Todos os julgados</DropdownMenuItem>
+                <DropdownMenuItem>Súmulas</DropdownMenuItem>
+                <DropdownMenuItem>Acórdãos</DropdownMenuItem>
+                <DropdownMenuItem>Decisões</DropdownMenuItem>
+                <DropdownMenuItem>Sentenças</DropdownMenuItem>
+                <DropdownMenuItem>Despachos</DropdownMenuItem>
+                <DropdownMenuItem>Orientações Jurisprudenciais</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -152,9 +156,13 @@ const Results = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuItem>Em qualquer data</DropdownMenuItem>
                 <DropdownMenuItem>Último mês</DropdownMenuItem>
                 <DropdownMenuItem>Último ano</DropdownMenuItem>
+                <DropdownMenuItem>Últimos 2 anos</DropdownMenuItem>
+                <DropdownMenuItem>Últimos 3 anos</DropdownMenuItem>
                 <DropdownMenuItem>Últimos 5 anos</DropdownMenuItem>
+                <DropdownMenuItem>Selecionar período</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
