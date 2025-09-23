@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ArrowUpDown } from "lucide-react";
+import TribunalFilterModal from "@/components/TribunalFilterModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +58,8 @@ const Results = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("relevance");
+  const [selectedTribunals, setSelectedTribunals] = useState<string[]>([]);
+  const [isTribunalModalOpen, setIsTribunalModalOpen] = useState(false);
 
   useEffect(() => {
     // Simulate API call
@@ -135,19 +138,12 @@ const Results = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  Tribunal <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>STF</DropdownMenuItem>
-                <DropdownMenuItem>STJ</DropdownMenuItem>
-                <DropdownMenuItem>TST</DropdownMenuItem>
-                <DropdownMenuItem>TJ-RJ</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsTribunalModalOpen(true)}
+            >
+              Tribunal <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -231,6 +227,13 @@ const Results = () => {
           </Button>
         </div>
       </div>
+
+      <TribunalFilterModal
+        isOpen={isTribunalModalOpen}
+        onClose={() => setIsTribunalModalOpen(false)}
+        selectedTribunals={selectedTribunals}
+        onApplyFilters={setSelectedTribunals}
+      />
     </div>
   );
 };
