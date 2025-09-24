@@ -39,9 +39,19 @@ const Header = ({ onSearch, showSearch = true, initialQuery = "" }: HeaderProps)
           <div className="flex items-center space-x-4">
             <button 
               onClick={() => navigate("/")}
-              className="text-2xl font-bold text-law-blue hover:text-primary transition-colors"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              JurisConsulta
+              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                <div className="space-y-1">
+                  <div className="w-6 h-0.5 bg-white rounded"></div>
+                  <div className="w-6 h-0.5 bg-white rounded"></div>
+                  <div className="w-6 h-0.5 bg-white rounded"></div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold">
+                <span className="text-foreground">jurisprudência</span>
+                <span className="text-muted-foreground">fácil</span>
+              </div>
             </button>
             
             {showSearch && (
