@@ -112,37 +112,7 @@ const Results = () => {
         
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="bg-primary text-primary-foreground">
-                  Jurisprudência <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>Jurisprudência</DropdownMenuItem>
-                <DropdownMenuItem>Legislação</DropdownMenuItem>
-                <DropdownMenuItem>Doutrina</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  Tipo de julgado <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>Todos os julgados</DropdownMenuItem>
-                <DropdownMenuItem>Súmulas</DropdownMenuItem>
-                <DropdownMenuItem>Acórdãos</DropdownMenuItem>
-                <DropdownMenuItem>Decisões</DropdownMenuItem>
-                <DropdownMenuItem>Sentenças</DropdownMenuItem>
-                <DropdownMenuItem>Despachos</DropdownMenuItem>
-                <DropdownMenuItem>Orientações Jurisprudenciais</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Button 
+            <Button
               variant="outline" 
               onClick={() => setIsTribunalModalOpen(true)}
             >
