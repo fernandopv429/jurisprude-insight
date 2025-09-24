@@ -149,10 +149,7 @@ const Results = () => {
                 Relevância
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortOrder("date")}>
-                Data
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSortOrder("court")}>
-                Tribunal
+                Data mais recente
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
