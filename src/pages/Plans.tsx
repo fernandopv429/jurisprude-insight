@@ -7,15 +7,35 @@ import { Badge } from "@/components/ui/badge";
 import { Check, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Plans = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [showCpfDialog, setShowCpfDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | null>(null);
+  const [cpfCnpj, setCpfCnpj] = useState("");
 
-  const handleSubscribe = async (planType: 'monthly' | 'annual') => {
-    if (!user) {
+  const handlePlanClick = (planType: 'monthly' | 'annual') => {
+    setSelectedPlan(planType);
+    setShowCpfDialog(true);
+  };
+
+  const handleSubscribe = async () => {
+    if (!user || !selectedPlan) {
+      return;
+    }
+
+    if (!cpfCnpj || cpfCnpj.length < 11) {
+      toast({
+        title: "Erro",
+        description: "Por favor, insira um CPF/CNPJ válido.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -35,11 +55,12 @@ const Plans = () => {
 
       const { data, error } = await supabase.functions.invoke('create-asaas-subscription', {
         body: {
-          planType,
-          amount: planData[planType].amount,
-          description: planData[planType].description,
+          planType: selectedPlan,
+          amount: planData[selectedPlan].amount,
+          description: planData[selectedPlan].description,
           userEmail: user.email,
-          userName: user.user_metadata?.full_name || user.email
+          userName: user.user_metadata?.full_name || user.email,
+          cpfCnpj: cpfCnpj.replace(/\D/g, '') // Remove non-numeric characters
         }
       });
 
@@ -65,6 +86,8 @@ const Plans = () => {
       });
     } finally {
       setIsLoading(false);
+      setShowCpfDialog(false);
+      setCpfCnpj("");
     }
   };
 
@@ -134,10 +157,10 @@ const Plans = () => {
               </ul>
               <Button 
                 className="w-full" 
-                onClick={() => handleSubscribe('monthly')}
+                onClick={() => handlePlanClick('monthly')}
                 disabled={isLoading}
               >
-                {isLoading ? "Processando..." : "Assinar Plano Mensal"}
+                Assinar Plano Mensal
               </Button>
             </CardContent>
           </Card>
@@ -175,10 +198,10 @@ const Plans = () => {
               </ul>
               <Button 
                 className="w-full" 
-                onClick={() => handleSubscribe('annual')}
+                onClick={() => handlePlanClick('annual')}
                 disabled={isLoading}
               >
-                {isLoading ? "Processando..." : "Assinar Plano Anual"}
+                Assinar Plano Anual
               </Button>
             </CardContent>
           </Card>
@@ -194,6 +217,51 @@ const Plans = () => {
           </p>
         </div>
       </div>
+
+      {/* CPF/CNPJ Dialog */}
+      <Dialog open={showCpfDialog} onOpenChange={setShowCpfDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Assinatura</DialogTitle>
+            <DialogDescription>
+              Para continuar, precisamos do seu CPF ou CNPJ para gerar o boleto de pagamento.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cpfCnpj">CPF ou CNPJ</Label>
+              <Input
+                id="cpfCnpj"
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                value={cpfCnpj}
+                onChange={(e) => setCpfCnpj(e.target.value)}
+                maxLength={18}
+              />
+              <p className="text-xs text-muted-foreground">
+                Digite apenas números ou use a formatação padrão
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowCpfDialog(false);
+                setCpfCnpj("");
+              }}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSubscribe}
+              disabled={isLoading || !cpfCnpj}
+            >
+              {isLoading ? "Processando..." : "Confirmar e Gerar Boleto"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

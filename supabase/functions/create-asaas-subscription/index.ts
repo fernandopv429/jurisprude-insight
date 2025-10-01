@@ -12,6 +12,13 @@ interface SubscriptionRequest {
   description: string;
   userEmail: string;
   userName: string;
+  cpfCnpj: string;
+  phone?: string;
+  address?: string;
+  addressNumber?: string;
+  complement?: string;
+  province?: string;
+  postalCode?: string;
 }
 
 serve(async (req) => {
@@ -42,7 +49,25 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { planType, amount, description, userEmail, userName }: SubscriptionRequest = await req.json();
+    const { 
+      planType, 
+      amount, 
+      description, 
+      userEmail, 
+      userName,
+      cpfCnpj,
+      phone,
+      address,
+      addressNumber,
+      complement,
+      province,
+      postalCode
+    }: SubscriptionRequest = await req.json();
+
+    // Validate required fields
+    if (!cpfCnpj) {
+      throw new Error('CPF/CNPJ is required.');
+    }
 
     // Get Asaas API key
     const asaasApiKey = Deno.env.get('ASAAS_API_KEY');
@@ -70,18 +95,30 @@ serve(async (req) => {
       customerId = existingCustomerData.data[0].id;
       console.log('Found existing customer:', customerId);
     } else {
-      // Create new customer
+      // Create new customer with full details
+      const customerPayload: any = {
+        name: userName,
+        email: userEmail,
+        cpfCnpj: cpfCnpj,
+      };
+
+      // Add optional fields if provided
+      if (phone) customerPayload.phone = phone;
+      if (address) customerPayload.address = address;
+      if (addressNumber) customerPayload.addressNumber = addressNumber;
+      if (complement) customerPayload.complement = complement;
+      if (province) customerPayload.province = province;
+      if (postalCode) customerPayload.postalCode = postalCode;
+
+      console.log('Creating customer with payload:', customerPayload);
+
       const customerResponse = await fetch('https://www.asaas.com/api/v3/customers', {
         method: 'POST',
         headers: {
           'access_token': asaasApiKey,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: userName,
-          email: userEmail,
-          cpfCnpj: "", // Will be filled by user later if needed
-        }),
+        body: JSON.stringify(customerPayload),
       });
 
       if (!customerResponse.ok) {
@@ -98,7 +135,7 @@ serve(async (req) => {
     // Step 2: Create subscription in Asaas
     const subscriptionData = {
       customer: customerId,
-      billingType: 'PIX', // Using PIX for Brazilian market
+      billingType: 'BOLETO', // Using BOLETO as requested
       value: amount,
       nextDueDate: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
       description: description,
