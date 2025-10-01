@@ -88,6 +88,14 @@ const Header = ({ onSearch, showSearch = true, initialQuery = "" }: HeaderProps)
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() => navigate("/minha-assinatura")}
+                  className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+                >
+                  Minha Assinatura
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => navigate("/planos")}
                   className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
                 >

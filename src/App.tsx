@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Results from "./pages/Results";
 import Auth from "./pages/Auth";
 import Plans from "./pages/Plans";
+import MySubscription from "./pages/MySubscription";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,11 @@ const App = () => (
           <Route path="/planos" element={
             <ProtectedRoute>
               <Plans />
+            </ProtectedRoute>
+          } />
+          <Route path="/minha-assinatura" element={
+            <ProtectedRoute>
+              <MySubscription />
             </ProtectedRoute>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
