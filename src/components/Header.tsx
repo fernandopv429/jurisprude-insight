@@ -2,8 +2,18 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, X, User, LogOut } from "lucide-react";
+import { Search, X, User, LogOut, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -13,6 +23,7 @@ interface HeaderProps {
 
 const Header = ({ onSearch, showSearch = true, initialQuery = "" }: HeaderProps) => {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
@@ -30,6 +41,16 @@ const Header = ({ onSearch, showSearch = true, initialQuery = "" }: HeaderProps)
 
   const handleClearSearch = () => {
     setSearchQuery("");
+  };
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setIsDrawerOpen(false);
+  };
+
+  const handleSignOut = () => {
+    signOut();
+    setIsDrawerOpen(false);
   };
 
   const isResultsPage = location.pathname === "/resultados";
@@ -56,26 +77,84 @@ const Header = ({ onSearch, showSearch = true, initialQuery = "" }: HeaderProps)
               </div>
             </button>
             
-            {/* Auth Section - Mobile */}
-            <div className="flex md:hidden items-center space-x-2">
-              {user ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={signOut}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={() => navigate("/auth")}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  Entrar
-                </Button>
-              )}
+            {/* Mobile Menu Drawer */}
+            <div className="flex md:hidden">
+              <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                <DrawerTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>Menu</DrawerTitle>
+                    <DrawerDescription>
+                      Navegue pelas opções do site
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  
+                  <div className="px-4 py-4 space-y-3">
+                    {user ? (
+                      <>
+                        <div className="flex items-center space-x-2 pb-3 border-b">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-foreground font-medium">
+                            {user.user_metadata?.full_name || user.email}
+                          </span>
+                        </div>
+                        
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => handleNavigate("/minha-assinatura")}
+                        >
+                          Minha Assinatura
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => handleNavigate("/planos")}
+                        >
+                          Ver Planos
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-destructive"
+                          onClick={handleSignOut}
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sair
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => handleNavigate("/planos")}
+                        >
+                          Ver Planos
+                        </Button>
+                        
+                        <Button
+                          className="w-full bg-primary hover:bg-primary/90"
+                          onClick={() => handleNavigate("/auth")}
+                        >
+                          Entrar / Cadastrar
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button variant="outline">Fechar</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
             </div>
           </div>
             
