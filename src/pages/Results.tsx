@@ -105,27 +105,29 @@ const Results = () => {
     <div className="min-h-screen bg-background">
       <Header onSearch={handleSearch} initialQuery={query} />
       
-      <div className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl font-semibold text-foreground mb-2">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground mb-3 sm:mb-4">
           Jurisprudência sobre <span className="font-bold">{query}</span>
         </h1>
         
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto pb-2 sm:pb-0">
             <Button
-              variant="outline" 
+              variant="outline"
+              size="sm"
               onClick={() => setIsTribunalModalOpen(true)}
+              className="whitespace-nowrap text-xs sm:text-sm"
             >
-              Tribunal <ChevronDown className="ml-2 h-4 w-4" />
+              Tribunal <ChevronDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  Em qualquer data <ChevronDown className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="whitespace-nowrap text-xs sm:text-sm">
+                  Data <ChevronDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent className="bg-popover">
                 <DropdownMenuItem>Em qualquer data</DropdownMenuItem>
                 <DropdownMenuItem>Último mês</DropdownMenuItem>
                 <DropdownMenuItem>Último ano</DropdownMenuItem>
@@ -139,12 +141,13 @@ const Results = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <ArrowUpDown className="mr-2 h-4 w-4" />
-                Reordenar
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm w-full sm:w-auto">
+                <ArrowUpDown className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Reordenar</span>
+                <span className="sm:hidden">Ordenar</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-popover">
               <DropdownMenuItem onClick={() => setSortOrder("relevance")}>
                 Relevância
               </DropdownMenuItem>
@@ -155,21 +158,21 @@ const Results = () => {
           </DropdownMenu>
         </div>
 
-        <p className="text-muted-foreground mb-6">
+        <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">
           Mais de 10.000 resultados
         </p>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {results.map((result) => (
             <div 
               key={result.id} 
-              className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-card border border-border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="mb-3">
-                <h3 className="text-lg font-medium text-law-blue hover:underline mb-2">
+                <h3 className="text-sm sm:text-base md:text-lg font-medium text-law-blue hover:underline mb-2 break-words">
                   {result.title}
                 </h3>
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-2">
                   {result.tags.map((tag, index) => (
                     <Badge 
                       key={index} 
@@ -183,21 +186,21 @@ const Results = () => {
               </div>
               
               <div className="mb-3">
-                <p className="font-semibold text-sm text-foreground">Ementa:</p>
-                <p className="text-sm text-muted-foreground leading-relaxed mt-1">
+                <p className="font-semibold text-xs sm:text-sm text-foreground">Ementa:</p>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">
                   {result.summary}
                 </p>
               </div>
               
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground break-words">
                 {result.court} • {result.type} • {new Date(result.date).toLocaleDateString('pt-BR')}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center">
-          <Button variant="outline">
+        <div className="mt-6 sm:mt-8 flex justify-center">
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
             Carregar mais resultados
           </Button>
         </div>

@@ -54,15 +54,15 @@ const TribunalSelector = ({ selectedTribunals, onSelectionChange }: TribunalSele
   const regionalTribunals = tribunals.filter(t => t.category === "regional");
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Buscar em:</h3>
-        <div className="flex space-x-2">
+    <div className="bg-card border border-border rounded-lg p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground">Buscar em:</h3>
+        <div className="flex space-x-2 text-sm">
           <Button 
             variant="link" 
             size="sm" 
             onClick={handleSelectAll}
-            className="text-law-blue"
+            className="text-law-blue p-0 h-auto"
           >
             Marcar todos
           </Button>
@@ -71,14 +71,14 @@ const TribunalSelector = ({ selectedTribunals, onSelectionChange }: TribunalSele
             variant="link" 
             size="sm" 
             onClick={handleDeselectAll}
-            className="text-law-blue"
+            className="text-law-blue p-0 h-auto"
           >
             Desmarcar todos
           </Button>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
         <div>
           {superiorTribunals.map((tribunal) => (
             <div key={tribunal.id} className="flex items-center space-x-2 mb-3">

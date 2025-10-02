@@ -111,32 +111,32 @@ const Plans = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => navigate("/")}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
+              <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Voltar</span>
             </Button>
-            <h1 className="text-2xl font-bold">JurisFácil</h1>
+            <h1 className="text-lg sm:text-2xl font-bold">JurisFácil</h1>
           </div>
         </div>
       </header>
 
       {/* Plans Section */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Escolha seu plano</h2>
-          <p className="text-lg text-muted-foreground">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-12">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Escolha seu plano</h2>
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground px-2">
             Acesso completo à plataforma de jurisprudências mais avançada do Brasil
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {/* Monthly Plan */}
           <Card className="relative">
             <CardHeader>
@@ -208,8 +208,8 @@ const Plans = () => {
         </div>
 
         {/* Trust Section */}
-        <div className="text-center mt-12 space-y-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="text-center mt-8 sm:mt-12 space-y-3 sm:space-y-4 px-2">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             🔒 Pagamento 100% seguro • Cancele a qualquer momento
           </p>
           <p className="text-xs text-muted-foreground">

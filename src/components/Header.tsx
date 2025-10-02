@@ -36,60 +36,82 @@ const Header = ({ onSearch, showSearch = true, initialQuery = "" }: HeaderProps)
 
   return (
     <header className="bg-card border-b border-border">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center justify-between w-full md:w-auto">
             <button 
               onClick={() => navigate("/")}
-              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              className="flex items-center space-x-2 sm:space-x-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center">
                 <div className="space-y-1">
-                  <div className="w-6 h-0.5 bg-white rounded"></div>
-                  <div className="w-6 h-0.5 bg-white rounded"></div>
-                  <div className="w-6 h-0.5 bg-white rounded"></div>
+                  <div className="w-5 h-0.5 sm:w-6 bg-white rounded"></div>
+                  <div className="w-5 h-0.5 sm:w-6 bg-white rounded"></div>
+                  <div className="w-5 h-0.5 sm:w-6 bg-white rounded"></div>
                 </div>
               </div>
-              <div className="text-2xl font-bold">
+              <div className="text-lg sm:text-2xl font-bold">
                 <span className="text-foreground">jurisprudência</span>
                 <span className="text-muted-foreground">fácil</span>
               </div>
             </button>
             
-            {showSearch && (
-              <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-8">
-                <div className="relative">
-                  <Input
-                    type="text"
-                    placeholder="Digite sua pesquisa..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-10 py-2 w-full"
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={handleClearSearch}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </form>
-            )}
+            {/* Auth Section - Mobile */}
+            <div className="flex md:hidden items-center space-x-2">
+              {user ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={signOut}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => navigate("/auth")}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  Entrar
+                </Button>
+              )}
+            </div>
           </div>
+            
+          {showSearch && (
+            <form onSubmit={handleSearch} className="flex-1 w-full md:max-w-2xl md:mx-8">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Digite sua pesquisa..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-10 py-2 w-full"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
 
-          {/* Auth Section */}
-          <div className="flex items-center space-x-4">
+          {/* Auth Section - Desktop */}
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {user ? (
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => navigate("/minha-assinatura")}
-                  className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+                  className="text-primary border-primary hover:bg-primary hover:text-primary-foreground hidden lg:inline-flex"
                 >
                   Minha Assinatura
                 </Button>
@@ -101,7 +123,7 @@ const Header = ({ onSearch, showSearch = true, initialQuery = "" }: HeaderProps)
                 >
                   Planos
                 </Button>
-                <div className="flex items-center space-x-2 px-2">
+                <div className="hidden lg:flex items-center space-x-2 px-2">
                   <User className="w-4 h-4" />
                   <span className="text-sm text-muted-foreground">
                     {user.user_metadata?.full_name || user.email}
