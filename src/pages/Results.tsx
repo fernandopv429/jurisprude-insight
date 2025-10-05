@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ArrowUpDown } from "lucide-react";
 import TribunalFilterModal from "@/components/TribunalFilterModal";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,62 +15,69 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface SearchResult {
-  id: string;
-  title: string;
-  court: string;
-  type: string;
-  date: string;
-  summary: string;
-  tags: string[];
+  ementa: string;
+  orgao_julgador?: string;
+  relator?: string;
+  data_julgamento?: string;
+  data_publicacao?: string;
+  numero_processo?: string;
+  [key: string]: any;
 }
-
-const mockResults: SearchResult[] = [
-  {
-    id: "1",
-    title: "TJ-RJ - APELAÇÃO XXXXX2022819000102050500901",
-    court: "Tribunal de Justiça do Rio de Janeiro",
-    type: "Acórdão",
-    date: "2023-05-15",
-    summary: "APELAÇÃO - ARTIGO : 147 -A, § 1º , II, DO CP . PENA: 0 9 meses de reclusão, em regime aberto, e 15 dias- multa . A pena privativa de liberdade restou substituída por duas restritivas de direitos . Desde data que não se sabe precisar, mas sendo certo que até o dia 14 de dezembro de 2 0 22 , por volta das 1 5h, na Avenida Marechal Câmara, altura do nº 16 0, bairro Centro, nesta comarca, o APELADO, de forma livre, consciente e voluntária, perseguiu a vítima Alessandra Vieira Ramos de Albuquerque Silva , por razões da condição do sexo feminino, reiteradamente, ameaçando-lhe a integridade física e psicológica...",
-    tags: ["Jurisprudência", "Acórdão", "Mostrar data de publicação"]
-  },
-  {
-    id: "2", 
-    title: "STJ - REsp 1.234.567/SP",
-    court: "Superior Tribunal de Justiça",
-    type: "Recurso Especial",
-    date: "2023-04-20",
-    summary: "PROCESSUAL CIVIL. RECURSO ESPECIAL. EXECUÇÃO DE TÍTULO EXTRAJUDICIAL. PENHORA ONLINE. SISTEMA BACENJUD. NECESSIDADE DE PRÉVIA INTIMAÇÃO DO DEVEDOR. PRECEDENTES. 1. A jurisprudência do STJ firmou-se no sentido de que a penhora online, por meio do sistema BacenJud, prescinde de prévia intimação do executado, desde que observados os requisitos legais...",
-    tags: ["Jurisprudência", "Recurso Especial", "Processual Civil"]
-  },
-  {
-    id: "3",
-    title: "TST - RR 1000-20.2019.5.02.0000",
-    court: "Tribunal Superior do Trabalho", 
-    type: "Recurso de Revista",
-    date: "2023-03-10",
-    summary: "RECURSO DE REVISTA. RESPONSABILIDADE SUBSIDIÁRIA. ADMINISTRAÇÃO PÚBLICA. TERCEIRIZAÇÃO. CULPA IN VIGILANDO E IN ELIGENDO. O reconhecimento da responsabilidade subsidiária da Administração Pública por débitos trabalhistas de suas contratadas pressupõe a demonstração de sua culpa in vigilando ou in eligendo, não se aplicando a responsabilização automática...",
-    tags: ["Jurisprudência", "Recurso de Revista", "Direito do Trabalho"]
-  }
-];
 
 const Results = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
+  const tribunaisParam = searchParams.get("tribunais") || "";
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("relevance");
   const [selectedTribunals, setSelectedTribunals] = useState<string[]>([]);
   const [isTribunalModalOpen, setIsTribunalModalOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Simulate API call
-    setIsLoading(true);
-    setTimeout(() => {
-      setResults(mockResults);
-      setIsLoading(false);
-    }, 800);
-  }, [query]);
+    const fetchResults = async () => {
+      if (!query) return;
+      
+      setIsLoading(true);
+      try {
+        const tribunais = tribunaisParam ? tribunaisParam.split(',') : null;
+        
+        console.log('Chamando função intelligent-search...', { query, tribunais });
+        
+        const { data, error } = await supabase.functions.invoke('intelligent-search', {
+          body: { query, tribunais },
+        });
+
+        if (error) {
+          console.error('Erro ao buscar:', error);
+          toast({
+            title: "Erro na busca",
+            description: "Não foi possível buscar jurisprudência. Tente novamente.",
+            variant: "destructive",
+          });
+          setResults([]);
+          return;
+        }
+
+        console.log('Resultados recebidos:', data);
+        setResults(data || []);
+        
+      } catch (error) {
+        console.error('Erro ao buscar jurisprudência:', error);
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao buscar jurisprudência.",
+          variant: "destructive",
+        });
+        setResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, [query, tribunaisParam, toast]);
 
   const handleSearch = (newQuery: string) => {
     window.location.href = `/resultados?q=${encodeURIComponent(newQuery)}`;
@@ -159,50 +168,56 @@ const Results = () => {
         </div>
 
         <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">
-          Mais de 10.000 resultados
+          {results.length > 0 ? `${results.length} resultados encontrados` : 'Nenhum resultado encontrado'}
         </p>
 
+        {results.length === 0 && !isLoading && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Nenhum resultado encontrado para sua busca.</p>
+            <p className="text-sm text-muted-foreground mt-2">Tente ajustar os termos de busca ou filtros.</p>
+          </div>
+        )}
+
         <div className="space-y-4 sm:space-y-6">
-          {results.map((result) => (
+          {results.map((result, index) => (
             <div 
-              key={result.id} 
+              key={index} 
               className="bg-card border border-border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="mb-3">
                 <h3 className="text-sm sm:text-base md:text-lg font-medium text-law-blue hover:underline mb-2 break-words">
-                  {result.title}
+                  {result.numero_processo || `Processo ${index + 1}`}
                 </h3>
                 <div className="flex flex-wrap items-center gap-2">
-                  {result.tags.map((tag, index) => (
-                    <Badge 
-                      key={index} 
-                      variant={index === 0 ? "default" : "secondary"}
-                      className="text-xs"
-                    >
-                      {tag}
+                  <Badge variant="default" className="text-xs">
+                    Jurisprudência
+                  </Badge>
+                  {result.orgao_julgador && (
+                    <Badge variant="secondary" className="text-xs">
+                      {result.orgao_julgador}
                     </Badge>
-                  ))}
+                  )}
                 </div>
               </div>
               
               <div className="mb-3">
                 <p className="font-semibold text-xs sm:text-sm text-foreground">Ementa:</p>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">
-                  {result.summary}
+                  {result.ementa}
                 </p>
               </div>
               
-              <div className="text-xs text-muted-foreground break-words">
-                {result.court} • {result.type} • {new Date(result.date).toLocaleDateString('pt-BR')}
+              <div className="text-xs text-muted-foreground break-words space-y-1">
+                {result.relator && <p>Relator: {result.relator}</p>}
+                {result.data_julgamento && (
+                  <p>Data de Julgamento: {new Date(result.data_julgamento).toLocaleDateString('pt-BR')}</p>
+                )}
+                {result.data_publicacao && (
+                  <p>Data de Publicação: {new Date(result.data_publicacao).toLocaleDateString('pt-BR')}</p>
+                )}
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="mt-6 sm:mt-8 flex justify-center">
-          <Button variant="outline" size="sm" className="w-full sm:w-auto">
-            Carregar mais resultados
-          </Button>
         </div>
       </div>
 
