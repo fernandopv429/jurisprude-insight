@@ -80,8 +80,11 @@ serve(async (req) => {
     // Step 1: Create or get customer in Asaas
     let customerId: string;
     
+    // Use sandbox URL for homologation environment
+    const asaasBaseUrl = 'https://sandbox.asaas.com/api/v3';
+    
     // First, try to find existing customer
-    const existingCustomerResponse = await fetch(`https://www.asaas.com/api/v3/customers?email=${encodeURIComponent(userEmail)}`, {
+    const existingCustomerResponse = await fetch(`${asaasBaseUrl}/customers?email=${encodeURIComponent(userEmail)}`, {
       method: 'GET',
       headers: {
         'access_token': asaasApiKey,
@@ -112,7 +115,7 @@ serve(async (req) => {
 
       console.log('Creating customer with payload:', customerPayload);
 
-      const customerResponse = await fetch('https://www.asaas.com/api/v3/customers', {
+      const customerResponse = await fetch(`${asaasBaseUrl}/customers`, {
         method: 'POST',
         headers: {
           'access_token': asaasApiKey,
@@ -144,7 +147,7 @@ serve(async (req) => {
 
     console.log('Creating subscription with data:', subscriptionData);
 
-    const subscriptionResponse = await fetch('https://www.asaas.com/api/v3/subscriptions', {
+    const subscriptionResponse = await fetch(`${asaasBaseUrl}/subscriptions`, {
       method: 'POST',
       headers: {
         'access_token': asaasApiKey,
@@ -183,7 +186,7 @@ serve(async (req) => {
     }
 
     // Step 4: Get payment URL from the first payment
-    const paymentsResponse = await fetch(`https://www.asaas.com/api/v3/payments?subscription=${subscription.id}`, {
+    const paymentsResponse = await fetch(`${asaasBaseUrl}/payments?subscription=${subscription.id}`, {
       method: 'GET',
       headers: {
         'access_token': asaasApiKey,
