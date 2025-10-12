@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { Chrome } from "lucide-react";
 
 const authSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -130,6 +132,28 @@ const Auth = () => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      
+      const { error: signInError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+      }
+    } catch (error) {
+      setError("Erro ao conectar com Google. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -162,6 +186,27 @@ const Auth = () => {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+              
+              <Button 
+                onClick={handleGoogleSignIn} 
+                className="w-full" 
+                variant="outline"
+                disabled={isLoading}
+              >
+                <Chrome className="mr-2 h-4 w-4" />
+                Continuar com Google
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Ou continue com email
+                  </span>
+                </div>
+              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -202,6 +247,27 @@ const Auth = () => {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+              
+              <Button 
+                onClick={handleGoogleSignIn} 
+                className="w-full" 
+                variant="outline"
+                disabled={isLoading}
+              >
+                <Chrome className="mr-2 h-4 w-4" />
+                Continuar com Google
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Ou cadastre-se com email
+                  </span>
+                </div>
+              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="fullName">Nome completo</Label>
