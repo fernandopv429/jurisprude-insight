@@ -11,110 +11,75 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// --- FUNÇÕES DA OPENAI (TRADUZIDAS DO PYTHON) ---
-async function generateKeywords(query: string): Promise<string[]> {
+// --- FUNÇÕES DE EMBEDDINGS E SIMILARIDADE ---
+async function getEmbedding(text: string): Promise<number[]> {
   try {
-    console.log('Gerando palavras-chave para:', query);
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
-        messages: [
-          {
-            role: 'system',
-            content: `Você é um assistente de IA especialista em direito brasileiro. Sua tarefa é, a partir de uma consulta do usuário, gerar uma lista de até 5 palavras-chave ou frases de busca alternativas para encontrar jurisprudência relevante. Retorne a resposta como uma lista JSON. Exemplo de saída: ["termo 1", "termo 2"]`,
-          },
-          { role: 'user', content: query },
-        ],
-        max_completion_tokens: 500,
+        model: 'text-embedding-3-small',
+        input: text,
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Erro na OpenAI:', response.status, error);
-      return [query];
+      console.error('Erro ao gerar embedding:', response.status, error);
+      throw new Error('Falha ao gerar embedding');
     }
 
     const data = await response.json();
-    const content = data.choices[0]?.message?.content;
-    
-    if (content) {
-      console.log('Resposta da OpenAI para keywords:', content);
-      // Tenta extrair a lista do conteúdo
-      const match = content.match(/\[.*?\]/);
-      if (match) {
-        const keywords = JSON.parse(match[0].replace(/'/g, '"'));
-        console.log('Palavras-chave geradas:', keywords);
-        return keywords;
-      }
-    }
-    return [query]; // Retorna a query original em caso de falha
+    return data.data[0].embedding;
   } catch (error) {
-    console.error('Erro ao gerar keywords:', error);
-    return [query]; // Retorna a query original em caso de erro
+    console.error('Erro ao gerar embedding:', error);
+    throw error;
   }
 }
 
-async function findRelevantEmentas(
+function cosineSimilarity(a: number[], b: number[]): number {
+  const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
+  const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
+  const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+  return dotProduct / (magnitudeA * magnitudeB);
+}
+
+async function rankEmentasBySimilarity(
+  query: string,
   ementas: any[],
-  originalQuery: string,
   limit: number
 ): Promise<any[]> {
   try {
-    console.log(`Analisando ${ementas.length} ementas para encontrar as ${limit} mais relevantes`);
-    const ementasText = ementas
-      .map((ementa, index) => `Ementa ${index}:\n${ementa.ementa}\n---`)
-      .join('\n');
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [
-          {
-            role: 'system',
-            content: `Você é um assistente de IA especialista em direito brasileiro. Analise a consulta do usuário e a lista de ementas fornecidas. Retorne uma lista JSON contendo os índices (e APENAS os índices) das ${limit} ementas mais relevantes para a consulta. A ementa mais relevante deve vir primeiro. Exemplo de saída: [índice_mais_relevante, outro_índice, ...]`,
-          },
-          {
-            role: 'user',
-            content: `Consulta: "${originalQuery}"\n\n${ementasText}`,
-          },
-        ],
-        max_completion_tokens: 1000,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('Erro na OpenAI:', response.status, error);
-      return ementas.slice(0, limit);
-    }
-
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
-
-    if (content) {
-      console.log('Resposta da OpenAI para relevância:', content);
-      const match = content.match(/\[.*?\]/);
-      if (match) {
-        const indexes = JSON.parse(match[0]) as number[];
-        console.log('Índices das ementas relevantes:', indexes);
-        return indexes.map((i) => ementas[i]).filter(Boolean); // Retorna as ementas na ordem de relevância
-      }
-    }
-    return ementas.slice(0, limit); // Retorna as primeiras em caso de falha
+    console.log(`Calculando similaridade para ${ementas.length} ementas`);
+    
+    // Calcular embedding da query
+    const queryEmbedding = await getEmbedding(query);
+    
+    // Calcular embeddings e similaridades para cada ementa
+    const ementasWithScores = await Promise.all(
+      ementas.map(async (ementa) => {
+        const ementaEmbedding = await getEmbedding(ementa.ementa);
+        const similarity = cosineSimilarity(queryEmbedding, ementaEmbedding);
+        return { ...ementa, similarity };
+      })
+    );
+    
+    // Ordenar por similaridade (maior primeiro) e retornar top N
+    const ranked = ementasWithScores
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, limit);
+    
+    console.log(`Top ${limit} ementas selecionadas com similaridades:`, 
+      ranked.map(e => e.similarity.toFixed(4)));
+    
+    return ranked;
   } catch (error) {
-    console.error('Erro ao encontrar ementas relevantes:', error);
-    return ementas.slice(0, limit); // Retorna as primeiras em caso de erro
+    console.error('Erro ao calcular similaridade:', error);
+    // Em caso de erro, retorna as primeiras ementas
+    return ementas.slice(0, limit);
   }
 }
 
@@ -170,23 +135,12 @@ serve(async (req) => {
     console.log('Query:', query);
     console.log('Tribunais:', tribunais);
 
-    // 1. Gerar palavras-chave com a OpenAI
-    const keywords = await generateKeywords(query);
-    console.log('Keywords geradas:', keywords);
+    // 1. Buscar até 100 ementas com a query original
+    const results = await searchApi(query, tribunais, LIMITE_EMENTAS_SEARCH);
+    console.log(`Total de resultados coletados: ${results.length}`);
 
-    // 2. Chamar a API de scraping para cada palavra-chave
-    let fullData: any[] = [];
-    const limitPerKeyword = Math.ceil(LIMITE_EMENTAS_SEARCH / keywords.length);
-
-    for (const keyword of keywords) {
-      const results = await searchApi(keyword, tribunais, limitPerKeyword);
-      fullData = fullData.concat(results);
-    }
-
-    console.log(`Total de resultados coletados: ${fullData.length}`);
-
-    // Remover duplicados e filtrar itens sem conteúdo
-    const uniqueData = Array.from(new Map(fullData.map((item) => [item.uuid, item])).values());
+    // 2. Remover duplicados e filtrar itens sem conteúdo
+    const uniqueData = Array.from(new Map(results.map((item) => [item.uuid, item])).values());
     console.log(`Após remover duplicados: ${uniqueData.length}`);
     
     const cleanedData = uniqueData.map((item) => item.conteudo).filter((item) => item && item.ementa);
@@ -199,8 +153,8 @@ serve(async (req) => {
       });
     }
 
-    // 3. Usar a OpenAI para encontrar as ementas mais relevantes
-    const relevantEmentas = await findRelevantEmentas(cleanedData, query, 10);
+    // 3. Usar embeddings semânticos para ranquear as ementas por similaridade
+    const relevantEmentas = await rankEmentasBySimilarity(cleanedData, query, 10);
     console.log(`Ementas relevantes selecionadas: ${relevantEmentas.length}`);
     console.log('=== FIM DA BUSCA INTELIGENTE ===');
 
