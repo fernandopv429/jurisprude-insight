@@ -1,8 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 // --- CONSTANTES DA API ---
-const SCRAPER_API_URL = Deno.env.get('SCRAPER_API_URL');
-const SCRAPER_API_KEY = Deno.env.get('SCRAPER_API_KEY');
+const SCRAPER_API_URL = 'http://72.60.61.18:5001/api/search';
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 const LIMITE_EMENTAS_SEARCH = 100;
 
@@ -123,11 +122,10 @@ async function findRelevantEmentas(
 async function searchApi(query: string, tribunal: string[] | null, limit: number) {
   try {
     console.log(`Chamando API de scraping: query="${query}", tribunal=${JSON.stringify(tribunal)}, limit=${limit}`);
-    const response = await fetch(SCRAPER_API_URL!, {
+    const response = await fetch(SCRAPER_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': SCRAPER_API_KEY!,
       },
       body: JSON.stringify({
         query: query,
