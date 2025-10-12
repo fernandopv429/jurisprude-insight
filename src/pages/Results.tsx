@@ -43,10 +43,14 @@ const Results = () => {
       try {
         const tribunais = tribunaisParam ? tribunaisParam.split(',') : null;
         
-        console.log('Chamando função intelligent-search...', { query, tribunais });
+        // Se todos os tribunais estiverem selecionados, não enviar filtro (evita 0 resultados na API)
+        const ALL_TRIBUNAIS = ["stf","stj","tst","tse","stm","tcu","tnu","tru","cnj","tj","trf","trt","tre","tjm","tce"];
+        const tribunaisToSend = tribunais && ALL_TRIBUNAIS.every(t => tribunais.includes(t)) && tribunais.length >= ALL_TRIBUNAIS.length ? null : tribunais;
+        
+        console.log('Chamando função intelligent-search...', { query, tribunais: tribunaisToSend });
         
         const { data, error } = await supabase.functions.invoke('intelligent-search', {
-          body: { query, tribunais },
+          body: { query, tribunais: tribunaisToSend },
         });
 
         if (error) {
