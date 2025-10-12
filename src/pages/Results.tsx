@@ -61,7 +61,7 @@ const Results = () => {
         }
 
         console.log('Resultados recebidos:', data);
-        setResults(data || []);
+        setResults(Array.isArray(data) ? data : []);
         
       } catch (error) {
         console.error('Erro ao buscar jurisprudência:', error);

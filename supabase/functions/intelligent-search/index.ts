@@ -154,7 +154,7 @@ serve(async (req) => {
     }
 
     // 3. Usar embeddings semânticos para ranquear as ementas por similaridade
-    const relevantEmentas = await rankEmentasBySimilarity(cleanedData, query, 10);
+    const relevantEmentas = await rankEmentasBySimilarity(query, cleanedData, 10);
     console.log(`Ementas relevantes selecionadas: ${relevantEmentas.length}`);
     console.log('=== FIM DA BUSCA INTELIGENTE ===');
 
