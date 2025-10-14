@@ -97,6 +97,16 @@ const Results = () => {
     });
   };
 
+  const getProcessNumber = (r: SearchResult) => r.numeroProcesso || (r as any).numero_processo || "";
+
+  const copyProcessNumber = (numero: string) => {
+    if (!numero) return;
+    navigator.clipboard.writeText(numero);
+    toast({
+      title: "Copiado!",
+      description: "Número do processo copiado.",
+    });
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -205,9 +215,18 @@ const Results = () => {
                       {result.tribunal}
                     </span>
                   )}
-                  {result.classeProcessual && (
-                    <span className="text-sm text-foreground">
-                      {result.classeProcessual}
+                  {getProcessNumber(result) && (
+                    <span className="text-sm text-foreground flex items-center gap-2">
+                      {getProcessNumber(result)}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => copyProcessNumber(getProcessNumber(result))}
+                        aria-label="Copiar número do processo"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
                     </span>
                   )}
                 </div>
