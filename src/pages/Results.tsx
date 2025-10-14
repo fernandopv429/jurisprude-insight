@@ -15,12 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface SearchResult {
-  ementa: string;
-  orgao_julgador?: string;
-  relator?: string;
-  data_julgamento?: string;
-  data_publicacao?: string;
-  numero_processo?: string;
+  ementa?: string;
+  decisao?: string;
+  classeProcessual?: string;
+  area?: string;
+  dataJulgamento?: string;
+  dataIndexacao?: string;
+  tribunal?: string;
+  numeroProcesso?: string;
   [key: string]: any;
 }
 
@@ -198,14 +200,14 @@ const Results = () => {
             >
               <div className="mb-4">
                 <div className="flex items-baseline gap-2 mb-3">
-                  {result.orgao_julgador && (
+                  {result.tribunal && (
                     <span className="text-sm font-semibold text-primary">
-                      {result.orgao_julgador}
+                      {result.tribunal}
                     </span>
                   )}
-                  {result.numero_processo && (
+                  {result.classeProcessual && (
                     <span className="text-sm text-foreground">
-                      {result.numero_processo}
+                      {result.classeProcessual}
                     </span>
                   )}
                 </div>
@@ -213,24 +215,23 @@ const Results = () => {
               
               <div className="mb-4">
                 <p className="text-xs sm:text-sm text-foreground leading-relaxed">
-                  {result.ementa}
+                  {result.ementa || result.decisao}
                 </p>
               </div>
               
               <div className="text-xs text-muted-foreground space-y-1 mb-4">
-                {result.orgao_julgador && <p>Órgão Julgador: {result.orgao_julgador}</p>}
-                {result.relator && <p>Relator: {result.relator}</p>}
-                {result.data_julgamento && (
-                  <p>Data do Julgamento: {result.data_julgamento}</p>
+                {result.area && <p>Área: {result.area}</p>}
+                {result.dataJulgamento && (
+                  <p>Data do Julgamento: {result.dataJulgamento}</p>
                 )}
-                {result.data_publicacao && (
-                  <p>Data da Publicação: {result.data_publicacao}</p>
+                {result.dataIndexacao && (
+                  <p>Data da Publicação: {result.dataIndexacao}</p>
                 )}
               </div>
 
               <div className="flex justify-end">
                 <Button
-                  onClick={() => copyEmenta(result.ementa)}
+                  onClick={() => copyEmenta(result.ementa || result.decisao || '')}
                   variant="default"
                   size="sm"
                   className="gap-2"
