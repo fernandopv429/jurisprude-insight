@@ -86,7 +86,10 @@ async function rankEmentasBySimilarity(
 // --- FUNÇÃO PARA CHAMAR A API DE SCRAPING ---
 async function searchApi(query: string, tribunal: string[] | null, limit: number) {
   try {
-    console.log(`Chamando API de scraping: query="${query}", tribunal=${JSON.stringify(tribunal)}, limit=${limit}`);
+    // Converter tribunais para MAIÚSCULAS (a API espera STF, STJ, etc)
+    const tribunalUppercase = tribunal ? tribunal.map(t => t.toUpperCase()) : null;
+    
+    console.log(`Chamando API de scraping: query="${query}", tribunal=${JSON.stringify(tribunalUppercase)}, limit=${limit}`);
     const response = await fetch(SCRAPER_API_URL, {
       method: 'POST',
       headers: {
@@ -95,7 +98,7 @@ async function searchApi(query: string, tribunal: string[] | null, limit: number
       body: JSON.stringify({
         query: query,
         limitentries: limit,
-        tribunal: tribunal,
+        tribunal: tribunalUppercase,
       }),
     });
 
