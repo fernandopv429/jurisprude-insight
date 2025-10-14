@@ -97,6 +97,40 @@ const Results = () => {
     });
   };
 
+  const mapToApiTribunals = (selected: string[]) => {
+    const set = new Set<string>();
+    selected.forEach((id) => {
+      if (id === 'stf' || id.startsWith('stf-')) set.add('stf');
+      else if (id === 'stj' || id.startsWith('stj-')) set.add('stj');
+      else if (id === 'tst' || id.startsWith('tst-')) set.add('tst');
+      else if (id === 'tse' || id.startsWith('tse-')) set.add('tse');
+      else if (id === 'stm' || id.startsWith('stm-')) set.add('stm');
+      else if (id === 'tcu' || id.startsWith('tcu-')) set.add('tcu');
+      else if (id === 'tnu') set.add('tnu');
+      else if (id === 'tru') set.add('tru');
+      else if (id === 'cnj') set.add('cnj');
+      else if (id === 'tjs' || id.startsWith('tj-')) set.add('tj');
+      else if (id === 'trfs') set.add('trf');
+      else if (id === 'trts') set.add('trt');
+      else if (id === 'tres' || id.startsWith('tre-')) set.add('tre');
+      else if (id === 'tjms' || id.startsWith('tjm-')) set.add('tjm');
+      else if (id === 'tces' || id.startsWith('tce-') || id.startsWith('tat-') || id.startsWith('tit-') || id.startsWith('cat-')) set.add('tce');
+    });
+    return Array.from(set);
+  };
+
+  const handleApplyTribunals = (selected: string[]) => {
+    setSelectedTribunals(selected);
+    const mapped = mapToApiTribunals(selected);
+    const params = new URLSearchParams(window.location.search);
+    if (mapped.length > 0) {
+      params.set('tribunais', mapped.join(','));
+    } else {
+      params.delete('tribunais');
+    }
+    const newUrl = `/resultados?${params.toString()}`;
+    window.location.href = newUrl;
+  };
   const getProcessNumber = (r: SearchResult) => r.numeroProcesso || (r as any).numero_processo || "";
 
   const copyProcessNumber = (numero: string) => {
@@ -268,7 +302,7 @@ const Results = () => {
         isOpen={isTribunalModalOpen}
         onClose={() => setIsTribunalModalOpen(false)}
         selectedTribunals={selectedTribunals}
-        onApplyFilters={setSelectedTribunals}
+        onApplyFilters={handleApplyTribunals}
       />
     </div>
   );
