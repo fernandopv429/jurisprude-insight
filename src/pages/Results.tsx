@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ArrowUpDown } from "lucide-react";
+import { ChevronDown, ArrowUpDown, Copy } from "lucide-react";
 import TribunalFilterModal from "@/components/TribunalFilterModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -85,6 +85,14 @@ const Results = () => {
 
   const handleSearch = (newQuery: string) => {
     window.location.href = `/resultados?q=${encodeURIComponent(newQuery)}`;
+  };
+
+  const copyEmenta = (ementa: string) => {
+    navigator.clipboard.writeText(ementa);
+    toast({
+      title: "Copiado!",
+      description: "Ementa copiada para a área de transferência.",
+    });
   };
 
   if (isLoading) {
@@ -186,39 +194,50 @@ const Results = () => {
           {results.map((result, index) => (
             <div 
               key={index} 
-              className="bg-card border border-border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-card border border-border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow"
             >
-              <div className="mb-3">
-                <h3 className="text-sm sm:text-base md:text-lg font-medium text-law-blue hover:underline mb-2 break-words">
-                  {result.numero_processo || `Processo ${index + 1}`}
-                </h3>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="default" className="text-xs">
-                    Jurisprudência
-                  </Badge>
+              <div className="mb-4">
+                <div className="flex items-baseline gap-2 mb-3">
                   {result.orgao_julgador && (
-                    <Badge variant="secondary" className="text-xs">
+                    <span className="text-sm font-semibold text-primary">
                       {result.orgao_julgador}
-                    </Badge>
+                    </span>
+                  )}
+                  {result.numero_processo && (
+                    <span className="text-sm text-foreground">
+                      {result.numero_processo}
+                    </span>
                   )}
                 </div>
               </div>
               
-              <div className="mb-3">
-                <p className="font-semibold text-xs sm:text-sm text-foreground">Ementa:</p>
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1">
+              <div className="mb-4">
+                <p className="text-xs sm:text-sm text-foreground leading-relaxed">
                   {result.ementa}
                 </p>
               </div>
               
-              <div className="text-xs text-muted-foreground break-words space-y-1">
+              <div className="text-xs text-muted-foreground space-y-1 mb-4">
+                {result.orgao_julgador && <p>Órgão Julgador: {result.orgao_julgador}</p>}
                 {result.relator && <p>Relator: {result.relator}</p>}
                 {result.data_julgamento && (
-                  <p>Data de Julgamento: {new Date(result.data_julgamento).toLocaleDateString('pt-BR')}</p>
+                  <p>Data do Julgamento: {result.data_julgamento}</p>
                 )}
                 {result.data_publicacao && (
-                  <p>Data de Publicação: {new Date(result.data_publicacao).toLocaleDateString('pt-BR')}</p>
+                  <p>Data da Publicação: {result.data_publicacao}</p>
                 )}
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => copyEmenta(result.ementa)}
+                  variant="default"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copiar ementa
+                </Button>
               </div>
             </div>
           ))}
